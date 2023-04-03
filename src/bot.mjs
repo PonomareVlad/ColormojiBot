@@ -1,5 +1,5 @@
 import {parseCommands, NewMethodsMixin} from "telebot-utils";
-import {circle} from "./svg.mjs";
+import {circle, convert} from "./svg.mjs";
 import TeleBot from "telebot";
 
 const {API_URL, TELEGRAM_BOT_TOKEN} = process.env;
@@ -15,14 +15,9 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
         try {
             const {isCommand, text, from: {id} = {}, reply = {}} = message || {};
             if (isCommand) return this.command(message);
-            const body = new FormData();
-            body.append("file", new Blob([circle(text)]), "sticker.svg");
-            const response = await fetch(API_URL, {body, method: "POST"});
-            const sticker = await response.arrayBuffer();
-            await reply.file(Buffer.from(sticker), {
-                fileName: "sticker.tgs",
-                asReply: true,
-            });
+            const sticker = await convert(circle(text));
+            const options = {fileName: "sticker.tgs", asReply: true};
+            await reply.file(sticker, options);
         } catch (e) {
             console.error(e);
         }

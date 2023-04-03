@@ -9,6 +9,7 @@
     "tunnel": "cloudflared tunnel --url http://localhost:3000"
   },
   "dependencies": {
+    "form-data": "^4.0.0",
     "telebot": "^1.4.1",
     "telebot-utils": "^0.0.2",
     "telebot-vercel": "^1.0.1"
