@@ -43,10 +43,17 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
         try {
             await this.answerCallbackQuery(id, {text: "Uploading emoji..."});
             const username = this.username ??= await this.get("username");
-            const set = {title: `@${username}`, name: getSetName(user_id, username), user_id};
+            const set = {
+                user_id,
+                title: `@${username}`,
+                name: getSetName(String(user_id), username)
+            };
             const buffer = await convert(shapes[data](color));
             const {file_id} = await this.uploadStickerFile({...set, buffer});
-            const sticker = {sticker: file_id, emoji_list: ["🌈"]};
+            const sticker = {
+                sticker: file_id,
+                emoji_list: ["🌈"]
+            };
             const {name} = await this.getStickerSet(set).catch(e => e);
             if (!name) await this.createNewStickerSet({...set, stickers: [sticker]});
             await this.addStickerToSet({...set, sticker});
@@ -56,7 +63,7 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
         } catch (error) {
             const json = JSON.stringify(serializeError(error), null, 2);
             const message = md.build(md.codeBlock(json, "json"));
-            return await this.editMessageText({chatId, messageId}, message);
+            return await this.editMessageText({chatId, messageId}, message, {parseMode: "MarkdownV2"});
         }
     }
 
