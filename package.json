@@ -1,5 +1,5 @@
 {
-  "name": "telebot-vercel-template",
+  "name": "colormoji-bot",
   "author": "Vladislav Ponomarev <PonomareVlad@users.noreply.github.com> (https://PonomareVlad.ru)",
   "funding": "https://PonomareVlad.ru/donate",
   "license": "MIT",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "telebot": "^1.4.1",
+    "telebot-utils": "^0.0.2",
     "telebot-vercel": "^1.0.1"
   },
   "engines": {
