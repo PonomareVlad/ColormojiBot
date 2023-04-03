@@ -2,7 +2,7 @@ import {parseCommands, NewMethodsMixin} from "telebot-utils";
 import {circle} from "./svg.mjs";
 import TeleBot from "telebot";
 
-const {TELEGRAM_BOT_TOKEN} = process.env;
+const {API_URL, TELEGRAM_BOT_TOKEN} = process.env;
 
 class ColormojiBot extends NewMethodsMixin(TeleBot) {
     constructor(...args) {
@@ -12,9 +12,20 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
     }
 
     async text(message = {}) {
-        const {isCommand, text, from: {id} = {}, reply = {}} = message || {};
-        if (isCommand) return this.command(message);
-        return reply.text(circle(text));
+        try {
+            const {isCommand, text, from: {id} = {}, reply = {}} = message || {};
+            if (isCommand) return this.command(message);
+            const body = new FormData();
+            body.append("file", new Blob([circle(text)]), "sticker.svg");
+            const response = await fetch(API_URL, {body, method: "POST"});
+            const sticker = await response.arrayBuffer();
+            await reply.file(Buffer.from(sticker), {
+                fileName: "sticker.tgs",
+                asReply: true,
+            });
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async command(message = {}) {
