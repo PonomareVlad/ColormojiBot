@@ -1,10 +1,12 @@
-import {parseCommands, NewMethodsMixin, getSetName} from "telebot-utils";
+import {parseCommands, NewMethodsMixin, getSetName, keyboardGrid} from "telebot-utils";
 import {serializeError} from "serialize-error";
 import {shapes, convert} from "./svg.mjs";
 import {md} from "telegram-md";
 import TeleBot from "telebot";
 
 const {TELEGRAM_BOT_TOKEN} = process.env;
+
+const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
 
 class ColormojiBot extends NewMethodsMixin(TeleBot) {
     constructor(...args) {
@@ -20,9 +22,9 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
             reply = {}
         } = message || {};
         if (isCommand) return this.command(message);
-        const text = `Select shape for new emoji:`;
-        const buttons = Object.keys(shapes).map(callback => this.inlineButton(callback, {callback}));
-        const replyMarkup = this.inlineKeyboard([buttons]);
+        const text = `Select shape and size for new emoji:`;
+        const buttons = Object.keys(shapes).map(callback => this.inlineButton(capitalize(callback), {callback}));
+        const replyMarkup = this.inlineKeyboard(keyboardGrid(buttons, 3));
         return reply.text(text, {asReply: true, replyMarkup});
     }
 
@@ -40,11 +42,12 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
         } = message;
         try {
             await this.answerCallbackQuery(id, {text: "Uploading emoji..."});
-            const username = this.username ??= await this.get("username");
+            const username = from.username || `id${from.id}`;
+            this.username ??= await this.get("username");
             const set = {
+                name: username,
                 user_id: from.id,
-                title: `@${username}`,
-                name: from.username || `id${from.id}`
+                title: `${username} @${this.username}`
             };
             const buffer = await convert(shapes[data](color));
             const {file_id} = await this.uploadStickerFile({...set, buffer});
@@ -55,7 +58,7 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
             const {name} = await this.getStickerSet(set).catch(e => e);
             if (!name) await this.createNewStickerSet({...set, stickers: [sticker]});
             await this.addStickerToSet({...set, sticker});
-            const text = `Emoji added to your set: t.me/addemoji/${set.name}`;
+            const text = `Emoji added to your set: t.me/addemoji/${getSetName(set.name, this.username)}`;
             await this.editMessageText({chatId, messageId}, text);
             await this.sendDocument(chatId, file_id, {fileName: "sticker.tgs"});
         } catch (error) {
