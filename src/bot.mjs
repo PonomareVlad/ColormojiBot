@@ -44,7 +44,7 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
             const set = {
                 user_id: from.id,
                 title: `@${username}`,
-                name: getSetName(from.username || `id${from.id}`, username)
+                name: from.username || `id${from.id}`
             };
             const buffer = await convert(shapes[data](color));
             const {file_id} = await this.uploadStickerFile({...set, buffer});
@@ -53,7 +53,6 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
                 emoji_list: ["🌈"]
             };
             const {name} = await this.getStickerSet(set).catch(e => e);
-            console.debug(name);
             if (!name) await this.createNewStickerSet({...set, stickers: [sticker]});
             await this.addStickerToSet({...set, sticker});
             const text = `Emoji added to your set: t.me/addemoji/${set.name}`;
