@@ -53,6 +53,7 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
                 emoji_list: ["🌈"]
             };
             const {name} = await this.getStickerSet(set).catch(e => e);
+            console.debug(name);
             if (!name) await this.createNewStickerSet({...set, stickers: [sticker]});
             await this.addStickerToSet({...set, sticker});
             const text = `Emoji added to your set: t.me/addemoji/${set.name}`;
