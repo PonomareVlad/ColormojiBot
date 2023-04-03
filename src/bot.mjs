@@ -35,18 +35,16 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
             } = {},
             reply_to_message: {
                 text: color,
-                from: {
-                    id: user_id
-                } = {}
+                from = {}
             } = {}
         } = message;
         try {
             await this.answerCallbackQuery(id, {text: "Uploading emoji..."});
             const username = this.username ??= await this.get("username");
             const set = {
-                user_id,
+                user_id: from.id,
                 title: `@${username}`,
-                name: getSetName(String(user_id), username)
+                name: getSetName(from.username || `id${from.id}`, username)
             };
             const buffer = await convert(shapes[data](color));
             const {file_id} = await this.uploadStickerFile({...set, buffer});
