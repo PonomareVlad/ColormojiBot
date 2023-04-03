@@ -36,3 +36,7 @@ export const convert = (svg = "") => {
         });
     }));
 }
+
+export const shapes = {
+    circle,
+}
