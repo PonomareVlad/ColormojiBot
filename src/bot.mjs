@@ -56,11 +56,11 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
                 emoji_list: ["🌈"]
             };
             const {name} = await this.getStickerSet(set).catch(e => e);
-            if (!name) await this.createNewStickerSet({...set, stickers: [sticker]});
-            await this.addStickerToSet({...set, sticker});
+            if (!name) await this.createNewStickerSet({...set, stickers: [sticker]}).catch(e => e);
+            await this.addStickerToSet({...set, sticker}).catch(e => e);
             const text = `Emoji added to your set: t.me/addemoji/${getSetName(set.name, this.username)}`;
             await this.editMessageText({chatId, messageId}, text);
-            await this.sendDocument(chatId, file_id, {fileName: "sticker.tgs"});
+            await this.sendDocument(chatId, file_id, {fileName: "sticker.tgs"}).catch(e => e);
         } catch (error) {
             const json = JSON.stringify(serializeError(error), null, 2);
             const message = md.build(md.codeBlock(json, "json"));
