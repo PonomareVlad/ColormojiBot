@@ -12,7 +12,7 @@
     "form-data": "^4.0.0",
     "serialize-error": "^11.0.0",
     "telebot": "^1.4.1",
-    "telebot-utils": "^0.0.3",
+    "telebot-utils": "^0.0.6",
     "telebot-vercel": "^1.0.1",
     "telegram-md": "^1.2.3"
   },
