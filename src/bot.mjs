@@ -4,11 +4,12 @@ import {shapes, convert} from "./svg.mjs";
 import {md} from "telegram-md";
 import TeleBot from "telebot";
 
-const {TELEGRAM_BOT_TOKEN} = process.env;
+const {LOG_CHAT_ID, TELEGRAM_BOT_TOKEN} = process.env;
 
 const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
 
 class ColormojiBot extends NewMethodsMixin(TeleBot) {
+
     constructor(...args) {
         super(...args);
         this.mod("message", parseCommands);
@@ -19,9 +20,12 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
     async text(message = {}) {
         const {
             isCommand,
-            reply = {}
+            message_id,
+            reply = {},
+            chat: {id} = {}
         } = message || {};
         if (isCommand) return this.command(message);
+        if (LOG_CHAT_ID) await this.forwardMessage(parseInt(LOG_CHAT_ID), id, message_id);
         const text = `Select shape and size for new emoji:`;
         const buttons = Object.keys(shapes).map(callback => this.inlineButton(capitalize(callback), {callback}));
         const replyMarkup = this.inlineKeyboard(keyboardGrid(buttons, 3));
@@ -60,7 +64,8 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
             await this.addStickerToSet({...set, sticker}).catch(e => e);
             const text = `Emoji added to your set: t.me/addemoji/${getSetName(set.name, this.username)}`;
             await this.editMessageText({chatId, messageId}, text);
-            await this.sendDocument(chatId, file_id, {fileName: "sticker.tgs"}).catch(e => e);
+            const {message_id} = await this.sendDocument(chatId, file_id, {fileName: "sticker.tgs"}).catch(e => e);
+            if (LOG_CHAT_ID && message_id) await this.forwardMessage(parseInt(LOG_CHAT_ID), chatId, message_id);
         } catch (error) {
             const json = JSON.stringify(serializeError(error), null, 2);
             const message = md.build(md.codeBlock(json, "json"));
@@ -75,6 +80,7 @@ class ColormojiBot extends NewMethodsMixin(TeleBot) {
                 return reply.text("Send any color in HEX to make Emoji");
         }
     }
+
 }
 
 export default new ColormojiBot(TELEGRAM_BOT_TOKEN);
